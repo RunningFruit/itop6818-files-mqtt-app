@@ -18,9 +18,14 @@ ldconfig
 
 
 <a href="https://brightereyer2.github.io/2020/02/15//articles/2020/02/15/1581731864000.html/" target="_blank">mosquitto配置与启动</a><br>
+```
+mosquitto_passwd -c /etc/mosquitto/pwfile admin
 
+mosquitto_sub -h localhost -t mytopic -u admin -P admin
+mosquitto_pub -h localhost -t mytopic -m "test message" -u admin -P admin
+```
 
-<a href="https://github.com/yuanabc/ziot-mqtt.git" target="_blank">springboot+mqtt</a>
+<a href="https://github.com/yuanabc/ziot-mqtt.git" target="_blank">ziot-mqtt</a>
 
 
 <a href="https://www.cnblogs.com/founderswitch/p/10791931.html" target="_blank">MQTT在react-native中的运行</a><br>
