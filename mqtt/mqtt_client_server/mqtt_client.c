@@ -3,7 +3,7 @@
 #include <mosquitto.h>
 #include <string.h>
 
-#define HOST "localhost"
+#define HOST "47.98.119.123"
 #define PORT  1883
 #define KEEP_ALIVE 60
 #define MSG_MAX_SIZE  512

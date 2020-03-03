@@ -1,0 +1,10 @@
+*
+!src/
+!src/*
+!src/**/*
+!definitions/
+!definitions/*
+!*.ts
+!lib/*.ts
+!package.json
+!*.md
