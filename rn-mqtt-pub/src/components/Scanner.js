@@ -26,7 +26,7 @@ const ScannerHeader = ({onPress}) => {
             </TouchableOpacity>
         </View>
     )
-}
+};
 
 const ScannerPromptTitle = () => {
     return (
@@ -35,34 +35,34 @@ const ScannerPromptTitle = () => {
             <Text style={{color: '#fff', fontSize: 18}}>请将食物条形码放入圈内</Text>
         </View>
     )
-}
+};
 
 export default class Scanner extends Component {
 
     state = {
         isBarCodeRead: false
-    }
+    };
 
     componentWillUnmount() {
         this.timer && clearTimeout(this.timer)
     }
 
-    _onBack = () => this.props.navigator.pop()
+    _onBack = () => this.props.navigator.pop();
 
     _onBarCodeRead = obj => {
-        const {onBarCodeRead, navigator} = this.props
-        if (this.state.isBarCodeRead) return
+        const {onBarCodeRead, navigator} = this.props;
+        if (this.state.isBarCodeRead) return;
 
         this.setState({isBarCodeRead: true}, () => {
-            this.scannerPrompt.show()
+            this.scannerPrompt.show();
             this.timer = setTimeout(() => {
-                navigator.pop()
-                onBarCodeRead && onBarCodeRead(obj)
+                navigator.pop();
+                onBarCodeRead && onBarCodeRead(obj);
 
                 this.scannerPrompt.hide()
             }, 2500)
         })
-    }
+    };
 
     render() {
         return (
@@ -85,7 +85,7 @@ class ScannerAnimatedContent extends Component {
     state = {
         down: true,
         positionAnimatedValue: new Animated.Value(0)
-    }
+    };
 
     componentDidMount() {
         this._startAnimation()
@@ -98,13 +98,13 @@ class ScannerAnimatedContent extends Component {
         }).start(() => {
             this.setState({down: !this.state.down}, () => this._startAnimation())
         })
-    }
+    };
 
     render() {
         const positionY = this.state.positionAnimatedValue.interpolate({
             inputRange: [0, 1],
             outputRange: [0, gScreen.width * 0.7 - 2]
-        })
+        });
         return (
             <View style={{marginTop: 30, alignSelf: 'center'}}>
                 <Image
@@ -184,4 +184,4 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center'
     }
-})
+});

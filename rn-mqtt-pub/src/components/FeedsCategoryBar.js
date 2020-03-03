@@ -9,10 +9,10 @@ import {
     Animated
 } from 'react-native'
 
-const DEFAULT_SCALE = 1
-const SELECT_SCALE = 1.2
-const DEFAULT_COLOR = 'black'
-const SELECT_COLOR = 'red'
+const DEFAULT_SCALE = 1;
+const SELECT_SCALE = 1.2;
+const DEFAULT_COLOR = 'black';
+const SELECT_COLOR = 'red';
 
 export default class FeedsCategoryBar extends Component {
     static propType = {
@@ -21,7 +21,7 @@ export default class FeedsCategoryBar extends Component {
         tabs: React.PropTypes.array,
 
         tabNames: React.PropTypes.array
-    }
+    };
 
     offsetX = new Animated.Value(0)
 
@@ -29,25 +29,25 @@ export default class FeedsCategoryBar extends Component {
         this.props.scrollValue.addListener(this.setAnimationValue)
     }
 
-    setAnimationValue = ({value}) => this.offsetX.setValue(value)
+    setAnimationValue = ({value}) => this.offsetX.setValue(value);
 
     render() {
-        const {tabs} = this.props
+        const {tabs} = this.props;
         const indicatorX = this.offsetX.interpolate({
             inputRange: [0, tabs.length - 1],
             outputRange: [0, gScreen.width * (tabs.length - 1) / tabs.length]
-        })
+        });
         return (
             <View style={styles.tabs}>
                 {tabs.map((tab, i) => {
                     const scale = this.offsetX.interpolate({
                         inputRange: [i - 2, i - 1, i, i + 1, i + 2],
                         outputRange: [DEFAULT_SCALE, DEFAULT_SCALE, SELECT_SCALE, DEFAULT_SCALE, DEFAULT_SCALE]
-                    })
+                    });
                     const color = this.offsetX.interpolate({
                         inputRange: [i - 2, i - 1, i, i + 1, i + 2],
                         outputRange: [DEFAULT_COLOR, DEFAULT_COLOR, SELECT_COLOR, DEFAULT_COLOR, DEFAULT_COLOR]
-                    })
+                    });
 
                     return (
                         <Animated.View key={`Tab_${i}`} style={[styles.tab, {transform: [{scale}]}]}>

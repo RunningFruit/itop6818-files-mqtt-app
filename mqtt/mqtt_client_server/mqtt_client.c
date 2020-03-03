@@ -34,7 +34,7 @@ void my_connect_callback(struct mosquitto *mosq, void *userdata, int result)
     int i;
     if(!result){
         /* Subscribe to broker information topics on successful connect. */
-        mosquitto_subscribe(mosq, NULL, "ycy ", 2);
+        mosquitto_subscribe(mosq, NULL, topic[1], 2);
     }else{
         fprintf(stderr, "Connect failed\n");
     }
@@ -94,7 +94,7 @@ int main()
     while(fgets(buff, MSG_MAX_SIZE, stdin) != NULL)
     {
         /*发布消息*/
-        mosquitto_publish(mosq,NULL,"CCYY ",strlen(buff)+1,buff,0,0);
+        mosquitto_publish(mosq,NULL,topic[2],strlen(buff)+1,buff,0,0);
         memset(buff,0,sizeof(buff));
     }
 

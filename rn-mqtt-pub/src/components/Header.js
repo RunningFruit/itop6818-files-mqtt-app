@@ -24,7 +24,7 @@ const LeftItem = ({onPress}) => {
             />
         </TouchableOpacity>
     )
-}
+};
 
 const RightItem = ({onPress, text}) => {
     return (
@@ -36,7 +36,7 @@ const RightItem = ({onPress, text}) => {
             <Text style={{fontSize: 15, color: '#666666'}}>{text}</Text>
         </TouchableOpacity>
     )
-}
+};
 
 const RightIconItem = ({onPress, icon}) => {
     return (
@@ -48,7 +48,7 @@ const RightIconItem = ({onPress, icon}) => {
             <Image style={{width: 18, height: 18}} source={icon} resizeMode={"contain"}/>
         </TouchableOpacity>
     )
-}
+};
 
 export default class Header extends Component {
     static propTypes = {
@@ -61,11 +61,11 @@ export default class Header extends Component {
         onRight: React.PropTypes.func,
         rightIcon: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.number]),
         renderRightItem: React.PropTypes.func
-    }
+    };
 
     static defaultProps = {
         showGoBack: true
-    }
+    };
 
     render() {
         const {
@@ -73,7 +73,7 @@ export default class Header extends Component {
             showGoBack, onBack,
             style, rightTitle, onRight, rightIcon,
             renderRightItem
-        } = this.props
+        } = this.props;
 
         return (
             <View style={[styles.header, style]}>
@@ -147,4 +147,4 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'flex-end'
     }
-})
+});

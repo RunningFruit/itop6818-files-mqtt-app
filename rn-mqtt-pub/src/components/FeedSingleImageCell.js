@@ -81,6 +81,6 @@ const styles = StyleSheet.create({
         color: 'rgb(150,150,150)',
         fontSize: 13
     }
-})
+});
 
 export default FeedSingleImageItem

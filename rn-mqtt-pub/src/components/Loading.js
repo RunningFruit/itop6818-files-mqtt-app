@@ -12,7 +12,7 @@ import {
 export default class Loading extends Component {
     static propTypes = {
         isShow: React.PropTypes.bool
-    }
+    };
 
     render() {
         if (!this.props.isShow) return null;

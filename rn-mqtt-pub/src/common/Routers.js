@@ -14,6 +14,6 @@ const router = {
     'FeedDetail': require('../pages/feed/FeedDetail'),
 
     // profile
-}
+};
 
 export default router

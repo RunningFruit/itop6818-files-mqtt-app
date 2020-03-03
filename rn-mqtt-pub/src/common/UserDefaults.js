@@ -24,6 +24,6 @@ let UserDefaults = {
     clearCachedObject: (key) => {
         return AsyncStorage.removeItem(key);
     },
-}
+};
 
 export default UserDefaults;

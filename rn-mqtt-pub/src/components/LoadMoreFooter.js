@@ -12,15 +12,15 @@ import {
 export default class LoadMoreFooter extends Component {
     static propTypes = {
         isNoMore: React.PropTypes.bool,
-    }
+    };
 
     static defaultProps = {
         isNoMore: false
-    }
+    };
 
     render() {
-        const {isNoMore} = this.props
-        const title = isNoMore ? '- 没有更多的数据了 -' : '正在加载更多的数据...'
+        const {isNoMore} = this.props;
+        const title = isNoMore ? '- 没有更多的数据了 -' : '正在加载更多的数据...';
 
         return (
             <View style={styles.loadingContainer}>
@@ -43,4 +43,4 @@ const styles = StyleSheet.create({
         marginLeft: 5,
         color: 'gray'
     }
-})
+});

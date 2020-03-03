@@ -37,7 +37,7 @@ export default class ShareView extends Component {
                 duration: ANIMATION_DURATION
             })
         ]).start()
-    }
+    };
 
     close = () => {
         Animated.sequence([
@@ -54,11 +54,11 @@ export default class ShareView extends Component {
             this.state.coverOpacityValue.setValue(0);
             this.setState({isShow: false})
         });
-    }
+    };
 
     shareChannelItemOnPress = channelName => {
         alert(channelName)
-    }
+    };
 
     render() {
         if (!this.state.isShow) return null
