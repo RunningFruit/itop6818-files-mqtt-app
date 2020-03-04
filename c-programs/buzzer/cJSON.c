@@ -26,17 +26,66 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-// #include <math.h>
 #include <float.h>
 #include <limits.h>
 #include <ctype.h>
 #include "cJSON.h"
 
-#include "mymath.h"
-
 static const char *ep;
 
 const char *cJSON_GetErrorPtr(void) {return ep;}
+
+
+#define INT_MAX 2147483647
+#define INT_MIN (-INT_MAX - 1)
+#define DBL_EPSILON 0.000001
+
+static double pow(double x, int n) {
+    int index = n;
+    double result = 1;
+    double sqr;
+    if (x == 0)
+        return x;
+    if (n == 1)
+        return x;
+    if (n == 0)
+        return 1;
+    if (n < 0)
+        index = -n;
+    if (index % 2 == 0) {
+        // index is even
+        sqr = pow(x, index / 2);
+        result = sqr * sqr;
+    }
+    else {
+        // index is odd
+        sqr = pow(x, (index + 1) / 2);
+        if (x == 0)
+            return 1;
+        result = sqr * sqr / x;
+    }
+    if (result == 0)
+        return 0;
+    if (n < 0) {
+        result = 1 / result;
+    }
+    return result;
+}
+static double fabs(double dnumber) {
+    *( ( (int *) & dnumber) + 1) &= 0x7FFFFFFF;
+    return dnumber;
+}
+
+static int floor(float a)
+{
+    int b = 0;
+    if (a >= 0)
+    {b = (int)a;}
+    else
+    {b = (int)a - 1;}
+    return b;
+}
+
 
 static int cJSON_strcasecmp(const char *s1,const char *s2)
 {
