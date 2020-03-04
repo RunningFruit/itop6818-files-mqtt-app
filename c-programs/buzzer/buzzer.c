@@ -1,8 +1,18 @@
 #include "mqttclient.h"
 
 
+#define HOST "47.98.119.123"
+#define PORT  1883
+#define KEEP_ALIVE 60
+#define MSG_MAX_SIZE  512
+#define TOPIC_NUM 3
+bool session = true;
 struct mosquitto *mosq = NULL;
 char buff[MSG_MAX_SIZE];
+const static char* pub_topic = "topic-led";
+
+
+#define MAX 3
 
 void init_mqtt()
 {
@@ -42,7 +52,7 @@ void pub_mqtt() {
 	while (fgets(buff, MSG_MAX_SIZE, stdin) != NULL)
 	{
 		//发布消息
-		mosquitto_publish(mosq, NULL, topic[2], strlen(buff) + 1, buff, 0, 0);
+		mosquitto_publish(mosq, NULL, pub_topic, strlen(buff) + 1, buff, 0, 0);
 		memset(buff, 0, sizeof(buff));
 	}
 }

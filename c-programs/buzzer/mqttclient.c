@@ -1,30 +1,15 @@
 #include "mqttclient.h"
 #include "cJSON.h"
+// #include "cjson/cJSON.h"
 
-#include <string.h>
-
-#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
 
-
-#define HOST "47.98.119.123"
-#define PORT  1883
-#define KEEP_ALIVE 60
-#define MSG_MAX_SIZE  512
-#define TOPIC_NUM 3
-bool session = true;
-const static char* topic[TOPIC_NUM] =
-{
-	"Gai爷:",
-	"topic",
-	"topic-led"
-};
-
-#define MAX 3
 
 int fd;
 char *buzzer = "/dev/buzzer_ctl";
@@ -90,7 +75,7 @@ void my_connect_callback(struct mosquitto *mosq, void *userdata, int result)
 	// int i;
 	if (!result) {
 		/* Subscribe to broker information topics on successful connect. */
-		mosquitto_subscribe(mosq, NULL, topic[1], 2);
+		mosquitto_subscribe(mosq, NULL, sub_topic, 2);
 	} else {
 		fprintf(stderr, "Connect failed\n");
 	}

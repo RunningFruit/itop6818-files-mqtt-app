@@ -23,14 +23,16 @@
 /* cJSON */
 /* JSON parser in C. */
 
+#include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include <math.h>
-#include <stdlib.h>
+// #include <math.h>
 #include <float.h>
 #include <limits.h>
 #include <ctype.h>
 #include "cJSON.h"
+
+#include "mymath.h"
 
 static const char *ep;
 
