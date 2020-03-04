@@ -1,83 +1,69 @@
-#include <stdio.h>
-#include <stdlib.h> 
-#include <fcntl.h> 
-#include <unistd.h> 
-#include <math.h>  
-#include <string.h>
+#include "mqttclient.h"
+#include <math.h>
 
-char iiotype[8][32] = { 
-	"in_voltage0_raw",
-	"in_voltage1_raw",
-	"in_voltage2_raw",
-	"in_voltage3_raw",
-	"in_voltage4_raw",
-	"in_voltage5_raw",
-	"in_voltage6_raw",
-	"in_voltage7_raw",
-};
+#define HOST "47.98.119.123"
+#define PORT  1883
+#define KEEP_ALIVE 60
+#define MSG_MAX_SIZE  512
+#define TOPIC_NUM 3
+bool session = true;
+struct mosquitto *mosq = NULL;
+char buff[MSG_MAX_SIZE];
+const static char* pub_topic = "topic-adc";
 
-//adc_channel 0 			:slide Res
-//adc_channel 2 			:temperature
-//adc_channel 3,4 			:connector J38 ADC3 ADC4
-//others adc_channel 1,5,6,7:reserved
-int read_adc_channel(int *value,int adc_channel) 
-{ 
-	int ret = 0; 
-	char filepath[100];
-	FILE *fp;
-	char buf[20]; 
-	
-	sprintf(filepath, "/sys/bus/iio/devices/iio\:device0/%s", iiotype[adc_channel]);
-	
-	printf("filepath is  %s!\n", filepath);
-	printf("adc_channel is  %d!\n", adc_channel);
-	
-	fp = fopen(filepath, "rt"); 
-	if(fp==NULL){ 
-		printf("open %s fail!\n", filepath); 
-		*value = 0; 
-		ret = -1; 
-		return ret; 
+
+void init_mqtt()
+{
+
+	//libmosquitto 库初始化
+	mosquitto_lib_init();
+	//创建mosquitto客户端
+	mosq = mosquitto_new(NULL, session, NULL);
+	if (!mosq) {
+		printf("create client failed..\n");
+		mosquitto_lib_cleanup();
+		return;
 	}
-	printf("open %s success!\n", filepath);
-	
-	ret = fread( buf, 1, sizeof(buf), fp); 
-	if(ret <0){
-		printf("fread %s fail!\n", filepath); 
-		return -1;
-	}	
-	printf("fread %s finish!\n", filepath);
-	
-	fclose(fp); 
-	//printf("return value is %s !\n", buf);
-	*value	= atoi(buf);
-	
-	return ret; 
+	//设置回调函数，需要时可使用
+	mosquitto_log_callback_set(mosq, my_log_callback);
+	mosquitto_connect_callback_set(mosq, my_connect_callback);
+	mosquitto_message_callback_set(mosq, my_message_callback);
+	mosquitto_subscribe_callback_set(mosq, my_subscribe_callback);
+
+
+	//连接服务器
+	if (mosquitto_connect(mosq, HOST, PORT, KEEP_ALIVE)) {
+		fprintf(stderr, "Unable to connect.\n");
+		return;
+	}
+	//开启一个线程，在线程里不停的调用 mosquitto_loop() 来处理网络信息
+	int loop = mosquitto_loop_start(mosq);
+	if (loop != MOSQ_ERR_SUCCESS)
+	{
+		printf("mosquitto loop error\n");
+		return;
+	}
+
 }
 
-     
-int main(int argc, char** argv) 
-{ 
-	int ret = 0; 
-	int value; 
-
-	if(argc !=2){
-		printf("Usage: [%s] [0-7] \n",argv[0]);
-		printf("type 0 :channel0:slide Res \n");
-		printf("type 2 :cpu temperature \n");
-		printf("type 3 or 4 :connector J38 ADC3 ADC4 \n");
-		printf("type 1,5,6,7 :reserved \n");
-		return 0;
+void pub_mqtt() {
+	while (fgets(buff, MSG_MAX_SIZE, stdin) != NULL)
+	{
+		//发布消息
+		mosquitto_publish(mosq, NULL, pub_topic, strlen(buff) + 1, buff, 0, 0);
+		memset(buff, 0, sizeof(buff));
 	}
-
-	ret = read_adc_channel(&value,atoi(argv[1])); 
-	if(ret < 0) 
-	{ 
-		printf("read channel%d failed!\n",atoi(argv[0]));
-		return ret; 
-	}
-	
-	printf("return value is %d!\n",value);
-	
-	return ret; 
 }
+
+void end_mqtt() {
+	mosquitto_destroy(mosq);
+	mosquitto_lib_cleanup();
+}
+
+void main(void)
+{
+	init_mqtt();
+	pub_mqtt();
+	end_mqtt();
+}
+

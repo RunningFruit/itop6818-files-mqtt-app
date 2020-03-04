@@ -9,10 +9,8 @@
 bool session = true;
 struct mosquitto *mosq = NULL;
 char buff[MSG_MAX_SIZE];
-const static char* pub_topic = "topic-led";
+const static char* pub_topic = "topic-buzzer";
 
-
-#define MAX 3
 
 void init_mqtt()
 {

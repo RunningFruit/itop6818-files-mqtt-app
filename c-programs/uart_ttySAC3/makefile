@@ -1,20 +1,26 @@
-all:buzzer
+all:Uart_ttySAC3
 	@echo ""
 	@echo "Start compiling......"
 	@echo ""
 
-OBJECTS= buzzer.o mqttclient.o cJSON.o
+OBJECTS= Uart_ttySAC3.o mqttclient.o cJSON.o
+# OBJECTS= Uart_ttySAC3.o mqttclient.o
 
-buzzer:$(OBJECTS)  
-	gcc -Wall -g $^ -o $@
+cJSON.o: cJSON.c
+	gcc -Wall -g -c $< -lm -o $@
+
+# cJSON.o: cJSON.c
+# 	gcc -c cJSON.c -lm
+# 	ar -rc cJSON.a cJSON.o
 
 mqttclient.o: mqttclient.c
-	gcc -Wall -g -c $< -o $@ -lmosquitto -lpthread
-cJSON.o: cJSON.c
-	gcc -Wall -g -c $< -o $@
+	gcc -Wall -g -c $< -lm -o $@ -lmosquitto -lpthread -lcjson
+
+Uart_ttySAC3:$(OBJECTS)  
+	gcc -Wall -g $^ -o $@ -lmosquitto -lpthread
 
 .PHONY:clean
 
 clean:
 	rm -rf *.o
-	rm -f buzzer
+	rm -f Uart_ttySAC3

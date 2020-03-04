@@ -1,24 +1,121 @@
 #include "mqttclient.h"
+#include "cJSON.h"
 
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
 
-#define HOST "47.98.119.123"
-#define PORT  1883
-#define KEEP_ALIVE 60
-#define MSG_MAX_SIZE  512
-#define TOPIC_NUM 3
-bool session = true;
-const static char* topic[TOPIC_NUM] =
-{
-	"Gai爷:",
-	"topic",
-	"topic-led"
+#include <math.h>
+
+char iiotype[8][32] = {
+	"in_voltage0_raw",
+	"in_voltage1_raw",
+	"in_voltage2_raw",
+	"in_voltage3_raw",
+	"in_voltage4_raw",
+	"in_voltage5_raw",
+	"in_voltage6_raw",
+	"in_voltage7_raw",
 };
+
+//adc_channel 0 			:slide Res
+//adc_channel 2 			:temperature
+//adc_channel 3,4 			:connector J38 ADC3 ADC4
+//others adc_channel 1,5,6,7:reserved
+int read_adc_channel(int *value, int adc_channel)
+{
+	int ret = 0;
+	char filepath[100];
+	FILE *fp;
+	char buf[20];
+
+	sprintf(filepath, "/sys/bus/iio/devices/iio\:device0/%s", iiotype[adc_channel]);
+
+	printf("filepath is  %s!\n", filepath);
+	printf("adc_channel is  %d!\n", adc_channel);
+
+	fp = fopen(filepath, "rt");
+	if (fp == NULL) {
+		printf("open %s fail!\n", filepath);
+		*value = 0;
+		ret = -1;
+		return ret;
+	}
+	printf("open %s success!\n", filepath);
+
+	ret = fread( buf, 1, sizeof(buf), fp);
+	if (ret < 0) {
+		printf("fread %s fail!\n", filepath);
+		return -1;
+	}
+	printf("fread %s finish!\n", filepath);
+
+	fclose(fp);
+	//printf("return value is %s !\n", buf);
+	*value	= atoi(buf);
+
+	return ret;
+}
+
+void excuteByCmd(char* type, char* cmd) {
+	//判断指令
+	if (strcmp(type, "adcChannel") == 0) {
+
+		int ret = 0;
+		int value;
+
+		printf("Usage: [%s] [0-7] \n", cmd);
+		printf("type 0 :channel0:slide Res \n");
+		printf("type 2 :cpu temperature \n");
+		printf("type 3 or 4 :connector J38 ADC3 ADC4 \n");
+		printf("type 1,5,6,7 :reserved \n");
+
+		ret = read_adc_channel(&value, atoi(cmd));
+		if (ret < 0)
+		{
+			printf("read channel%d failed!\n", atoi(cmd));
+		}
+		printf("return value is %d!\n", value);
+
+	}
+}
 
 void my_message_callback(struct mosquitto *mosq, void *userdata, const struct mosquitto_message *message)
 {
-
 	if (message->payloadlen) {
-		printf("%s %s", message->topic, (char *)message->payload);
+		printf("%s \n %s \n", message->topic, (char *)message->payload);
+
+		/**************************
+		 *      json的解析
+		 **************************/
+		char jsonString[1024];
+		strcpy(jsonString, (char *)message->payload);
+		cJSON *json = 0, *json_type = 0, *json_cmd = 0;
+		json = cJSON_Parse(jsonString);
+		//如果解析失败
+		if (!json) {
+			printf("Error Before:", cJSON_GetErrorPtr());
+		} else {
+			json_type = cJSON_GetObjectItem(json, "type");
+			//如果类型是 字符串
+			if (json_type->type == cJSON_String) {
+				printf("类型：%s\n", json_type->valuestring);
+			}
+			json_cmd = cJSON_GetObjectItem(json, "cmd");
+			//如果类型是 字符串
+			if (json_cmd->type == cJSON_String) {
+				printf("指令：%s\n", json_cmd->valuestring);
+			}
+			//释放内存
+			cJSON_Delete(json);
+		}
+
+		excuteByCmd(json_type->valuestring, json_cmd->valuestring);
+
 	} else {
 		printf("%s (null)\n", message->topic);
 	}
@@ -27,10 +124,10 @@ void my_message_callback(struct mosquitto *mosq, void *userdata, const struct mo
 
 void my_connect_callback(struct mosquitto *mosq, void *userdata, int result)
 {
-	int i;
+	// int i;
 	if (!result) {
 		/* Subscribe to broker information topics on successful connect. */
-		mosquitto_subscribe(mosq, NULL, topic[1], 2);
+		mosquitto_subscribe(mosq, NULL, sub_topic, 2);
 	} else {
 		fprintf(stderr, "Connect failed\n");
 	}
@@ -52,54 +149,3 @@ void my_log_callback(struct mosquitto *mosq, void *userdata, int level, const ch
 	printf("%s\n", str);
 }
 
-
-struct mosquitto *mosq = NULL;
-char buff[MSG_MAX_SIZE];
-
-void init_mqtt()
-{
-
-	//libmosquitto 库初始化
-	mosquitto_lib_init();
-	//创建mosquitto客户端
-	mosq = mosquitto_new(NULL, session, NULL);
-	if (!mosq) {
-		printf("create client failed..\n");
-		mosquitto_lib_cleanup();
-		return;
-	}
-	//设置回调函数，需要时可使用
-	mosquitto_log_callback_set(mosq, my_log_callback);
-	mosquitto_connect_callback_set(mosq, my_connect_callback);
-	mosquitto_message_callback_set(mosq, my_message_callback);
-	mosquitto_subscribe_callback_set(mosq, my_subscribe_callback);
-
-
-	//连接服务器
-	if (mosquitto_connect(mosq, HOST, PORT, KEEP_ALIVE)) {
-		fprintf(stderr, "Unable to connect.\n");
-		return;
-	}
-	//开启一个线程，在线程里不停的调用 mosquitto_loop() 来处理网络信息
-	int loop = mosquitto_loop_start(mosq);
-	if (loop != MOSQ_ERR_SUCCESS)
-	{
-		printf("mosquitto loop error\n");
-		return;
-	}
-
-}
-
-void pub_mqtt() {
-	while (fgets(buff, MSG_MAX_SIZE, stdin) != NULL)
-	{
-		//发布消息
-		mosquitto_publish(mosq, NULL, topic[2], strlen(buff) + 1, buff, 0, 0);
-		memset(buff, 0, sizeof(buff));
-	}
-}
-
-void end_mqtt() {
-	mosquitto_destroy(mosq);
-	mosquitto_lib_cleanup();
-}

@@ -40,21 +40,13 @@ npm install
 react-native run-android
 ```
 
-armhf math
+
+<details>
+<summary>cJSON缺少pow、floor、fabs函数解决办法</summary>
+
+尝试安装math库
 ```
-apt-get install --force-yes liblapack-dev libblas-dev libboost-dev libarpack2-dev libarmadillo-dev
-
-apt-get install libc6-dev-i386
-```
-
-```
-#include包含的顺序错误了
-#要先包函stdlib.h stdio.h
-
-gcc -c cJSON.c -lm -o cJSON.o
-
-gcc -c cJSON.c -lm
-ar -rc cJSON.a cJSON.o
+apt-get install libc6-dev
 ```
 
 <a href="https://www.jianshu.com/p/9aa57961b17b" target="_blank">cJSON库使用</a>
@@ -67,140 +59,109 @@ make install
 gcc test.c -lcjson -o test
 ```
 
-JsonCpp
 ```
-apt-get install libjsoncpp-dev
-```
-
-<a href="https://www.jianshu.com/p/9cb4f3394e58" target="_blank">c语言实现pow(x,y)函数</a>
-```
-原来是个叫libm的东西，gcc的就叫glibm
-那glibm在哪里呢？在glibc，也就是c标准库里
-是在是不想再在mac里找各种文件了，我再重新下载一个吧
-libm.so位于 libc6-dev 这个包里，那就到pkgs.org上找找
-
-#apt-get install libc6-dev-i386
-apt-get install libc6-dev
-
-apt-get install locate
-updatedb
-locate libm.so
+gcc -c cJSON.c -lm -o cJSON.o
+#或
+gcc -c cJSON.c -lm
+ar -rc cJSON.a cJSON.o
 ```
 
-编译C程序mqtt
+<a href="https://blog.csdn.net/dengcanjun6/article/details/80624889" target="_blank">cJSON移植缺少C库解决方法</a>
 ```
-make
-```
+#define INT_MAX 2147483647
+#define INT_MIN (-INT_MAX - 1)
+#define DBL_EPSILON 0.000001
 
-pow2.c
-```
-#include <stdio.h>
-#define ACCURACY 100
-double func1(double t,int n);
-double func2(double b,int n);
-double pow2(double a,double b);
-int main() {
-    printf("%lf",pow2(5.21,4.11));
-    return 0;
-}
-
-double pow2(double a,double b){
-    if(a==0&&b>0){
+static double pow(double x, int n) {
+    int index = n;
+    double result = 1;
+    double sqr;
+    if (x == 0)
+        return x;
+    if (n == 1)
+        return x;
+    if (n == 0)
+        return 1;
+    if (n < 0)
+        index = -n;
+    if (index % 2 == 0) {
+        // index is even
+        sqr = pow(x, index / 2);
+        result = sqr * sqr;
+    }
+    else {
+        // index is odd
+        sqr = pow(x, (index + 1) / 2);
+        if (x == 0)
+            return 1;
+        result = sqr * sqr / x;
+    }
+    if (result == 0)
         return 0;
+    if (n < 0) {
+        result = 1 / result;
     }
-    else if(a==0&&b<=0){
-        return 1/0;
-    }
-    else if(a<0&&!(b-(int)b<0.0001||(b-(int)b>0.999))){
-        return 1/0;
-    }
+    return result;
+}
+static double fabs(double dnumber) {
+    *( ( (int *) & dnumber) + 1) &= 0x7FFFFFFF;
+    return dnumber;
+}
 
-    if(a<=2&&a>=0){
-        double t=a-1;
-        double answer=1;
-        for(int i=1;i<ACCURACY;i++){
-            answer=answer+func1(t,i)*func2(b,i);
-        }
-        return answer;
-    }
-    
-    else if(a>2){
-        int time=0;
-        
-        while(a>2){
-            a=a/2;
-            time++;
-        }
-        
-        return pow2(a,b)*pow2(2,b*time);
-    }
-    
-    else{
-        if((int)b%2==0){
-            return pow2(-a,b);
-        }
-        else {
-            return -pow2(-a,b);
-        }
-    }
-}
-double func1(double t,int n){
-    double answer=1;
-    for(int i=0;i<n;i++){
-        answer=answer*t;
-    }
-    
-    return answer;
-}
-double func2(double b,int n){
-    double answer=1;
-    for(int i=1;i<=n;i++){
-        answer=answer*(b-i+1)/i;
-    }
-    
-    return answer;
+static int floor(float a)
+{
+    int b = 0;
+    if (a >= 0)
+    {b = (int)a;}
+    else
+    {b = (int)a - 1;}
+    return b;
 }
 ```
-
-
 <a href="https://blog.csdn.net/whik1194/article/details/84798365" target="_blank">C语言解析天气</a>
 <a href="https://wcc-blog.oss-cn-beijing.aliyuncs.com/BlogFile/MyJSON.rar" target="_blank">MyJSON.rar</a>
-
-
 <a href="https://www.jianshu.com/p/4fcb49b55ff6" target="_blank">cJSON解析一个JSON数据</a>
 ```
 #include <stdio.h>
 #include <stdlib.h>
 #include "cjson/cJSON.h"
 
-char text[] = "{\"timestamp\":\"2019-03-03 08:45:57\", \"value\":1}";
-
-int main(int argc, const char *argv[])
+int main(void)
 {
-    cJSON *json, *json_value, *json_timestamp;
+    char *cjson_str = NULL;
+    cJSON * root =  cJSON_CreateObject();
+    cJSON * item =  cJSON_CreateObject();
+    cJSON * next =  cJSON_CreateObject();
 
-    json = cJSON_Parse(text);
-    if(NULL == json)
-    {
-        printf("Error before: [%s]\n", cJSON_GetErrorPtr());
-        return -1;
-    }
+    cJSON_AddItemToObject(root, "rc", cJSON_CreateNumber(0));//根节点下添加
+    cJSON_AddItemToObject(root, "operation", cJSON_CreateString("CALL"));
+    cJSON_AddItemToObject(root, "service", cJSON_CreateString("telephone"));
+    cJSON_AddItemToObject(root, "text", cJSON_CreateString("打电话给张三"));
+    cJSON_AddItemToObject(root, "semantic", item);//root节点下添加semantic节点
+    cJSON_AddItemToObject(item, "slots", next);//semantic节点下添加item节点
+    cJSON_AddItemToObject(next, "name", cJSON_CreateString("张三"));//添加name节点
 
-    json_value = cJSON_GetObjectItem(json, "value");
-    if(json_value->type == cJSON_Number)
-    {
-        printf("value: %d\n", json_value->valueint);
-    }
+    cjson_str = cJSON_Print(root);
+    printf("first json:\n%s\n", cjson_str);
+    free(cjson_str);
 
-    json_timestamp = cJSON_GetObjectItem(json, "timestamp");
-    if(json_timestamp->type == cJSON_String)
-    {
-        printf("%s\n", json_timestamp->valuestring);
-    }
+    cJSON_AddStringToObject(next, "number", "13423452334");
+    cJSON_AddNumberToObject(next, "age", 35);
+    cJSON_AddBoolToObject(next, "man", 1);
 
-    cJSON_Delete(json);
+    cjson_str = cJSON_Print(root);
+    printf("second json:\n%s\n", cjson_str);
+    free(cjson_str);
+
+    cJSON_Delete(root);
 
     return 0;
 }
 ```
+</details>
 
+
+编译C程序mqtt
+```
+make
+```

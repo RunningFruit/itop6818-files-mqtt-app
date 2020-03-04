@@ -10,8 +10,40 @@
 #include <unistd.h>
 
 
+#define MAX 3
+
 int fd;
 char *buzzer = "/dev/buzzer_ctl";
+
+void excuteByCmd(char* type, char* cmd) {
+	//判断指令
+	if (strcmp(type, "buzzer") == 0) {
+		if (strcmp(cmd, "on") == 0) {
+			int BuzzerOnOffTimes;
+			BuzzerOnOffTimes = MAX;
+
+			printf("buzzer light on and off 5 times \r\n");
+
+			if ((fd = open(buzzer, O_RDWR | O_NOCTTY | O_NDELAY)) < 0)
+				printf("open %s failed\n", buzzer);
+			else
+			{
+				printf("open %s success\r\n", buzzer);
+				while (BuzzerOnOffTimes--)
+				{
+					printf("ioctl buzzer %d times\n", BuzzerOnOffTimes);
+					ioctl(fd, 1);	//parameter 2 is cmd ,cmd = 1 buzzer on
+					sleep(1);
+					ioctl(fd, 0);
+					sleep(1);
+				}
+			}
+			close(fd);
+		} else {
+			close(fd);
+		}
+	}
+}
 
 void my_message_callback(struct mosquitto *mosq, void *userdata, const struct mosquitto_message *message)
 {
@@ -43,29 +75,7 @@ void my_message_callback(struct mosquitto *mosq, void *userdata, const struct mo
 			cJSON_Delete(json);
 		}
 
-		//判断指令
-		if (strcmp(json_type->valuestring, "led") == 0) {
-			printf("is led\n");
-
-			if (strcmp(json_cmd->valuestring, "on") == 0) {
-
-				printf("is on\n");
-
-				if ((fd = open(buzzer, O_RDWR | O_NOCTTY | O_NDELAY)) < 0)
-					printf("open %s failed\n", buzzer);
-				else
-				{
-					printf("open %s success\r\n", buzzer);
-					ioctl(fd, 1);	//parameter 2 is cmd ,cmd = 1 buzzer on
-					sleep(1);
-					ioctl(fd, 0);
-					sleep(1);
-				}
-			} else {
-				close(fd);
-			}
-
-		}
+		excuteByCmd(json_type->valuestring, json_cmd->valuestring);
 
 	} else {
 		printf("%s (null)\n", message->topic);

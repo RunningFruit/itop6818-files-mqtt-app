@@ -1,38 +1,69 @@
-#include <stdio.h>
-#include <stdlib.h>
+#include "mqttclient.h"
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
 
-#include <unistd.h>
+#define HOST "47.98.119.123"
+#define PORT  1883
+#define KEEP_ALIVE 60
+#define MSG_MAX_SIZE  512
+#define TOPIC_NUM 3
+bool session = true;
+struct mosquitto *mosq = NULL;
+char buff[MSG_MAX_SIZE];
+const static char* pub_topic = "topic-led";
 
-#define MAX 10
+
+void init_mqtt()
+{
+
+	//libmosquitto 库初始化
+	mosquitto_lib_init();
+	//创建mosquitto客户端
+	mosq = mosquitto_new(NULL, session, NULL);
+	if (!mosq) {
+		printf("create client failed..\n");
+		mosquitto_lib_cleanup();
+		return;
+	}
+	//设置回调函数，需要时可使用
+	mosquitto_log_callback_set(mosq, my_log_callback);
+	mosquitto_connect_callback_set(mosq, my_connect_callback);
+	mosquitto_message_callback_set(mosq, my_message_callback);
+	mosquitto_subscribe_callback_set(mosq, my_subscribe_callback);
+
+
+	//连接服务器
+	if (mosquitto_connect(mosq, HOST, PORT, KEEP_ALIVE)) {
+		fprintf(stderr, "Unable to connect.\n");
+		return;
+	}
+	//开启一个线程，在线程里不停的调用 mosquitto_loop() 来处理网络信息
+	int loop = mosquitto_loop_start(mosq);
+	if (loop != MOSQ_ERR_SUCCESS)
+	{
+		printf("mosquitto loop error\n");
+		return;
+	}
+
+}
+
+void pub_mqtt() {
+	while (fgets(buff, MSG_MAX_SIZE, stdin) != NULL)
+	{
+		//发布消息
+		mosquitto_publish(mosq, NULL, pub_topic, strlen(buff) + 1, buff, 0, 0);
+		memset(buff, 0, sizeof(buff));
+	}
+}
+
+void end_mqtt() {
+	mosquitto_destroy(mosq);
+	mosquitto_lib_cleanup();
+}
+
 void main(void)
 {
-	int fd,LedOnOffTimes;
-	char gpio[MAX],cmd[MAX];
-	char *leds = "/dev/leds_ctl";
-	LedOnOffTimes = MAX;
-	
-	printf("leds light on and off 5 times \r\n");
-
-	
-	if((fd = open(leds, O_RDWR|O_NOCTTY|O_NDELAY))<0)
-	printf("open %s failed\n",leds);   
-	else
-	{	
-    	printf("open %s success\r\n",leds);
-		while(LedOnOffTimes--)
-		{
-			printf("ioctl leds %d times\n",LedOnOffTimes);
-			ioctl(fd,0,0);	//parameter 2 is cmd ,cmd = 1 leds on
-			ioctl(fd,0,1);
-			sleep(1);
-			ioctl(fd,1,0);
-			ioctl(fd,1,1);
-			sleep(1);		
-		}
-    }
-	close(fd);
+	init_mqtt();
+	pub_mqtt();
+	end_mqtt();
 }
+
