@@ -11,7 +11,7 @@ buzzer:$(OBJECTS)
 mqttclient.o: mqttclient.c
 	gcc -Wall -g -c $< -o $@ -lmosquitto -lpthread
 cJSON.o: cJSON.c
-	gcc -Wall -g -c $< -o $@
+	gcc -Wall -g -c $< -o $@ -lm
 
 .PHONY:clean
 
