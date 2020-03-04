@@ -15,39 +15,39 @@
 
 #define MAX 10
 
-int set_opt(int,int,int,char,int);
+int set_opt(int, int, int, char, int);
 
 void main(void)
 {
-	int fd,UartSendDataTimes;
+	int fd, UartSendDataTimes;
 	char *uart = "/dev/ttySAC1";
-	char UartBuffer[] = "helloworld!\r\n"; 
+	char UartBuffer[] = "helloworld!\r\n";
 	UartSendDataTimes = MAX;
-	
+
 	printf("Uart  ttySAC3 send 10 times\n");
 
-	
-	if((fd = open(uart, O_RDWR|O_NOCTTY|O_NDELAY))<0)
-	printf("open %s failed\n",uart);   
+
+	if ((fd = open(uart, O_RDWR | O_NOCTTY | O_NDELAY)) < 0)
+		printf("open %s failed\n", uart);
 	else
-	{	
-    	printf("open %s success\n",uart);
+	{
+		printf("open %s success\n", uart);
 		set_opt(fd, 115200, 8, 'N', 1);
-	printf("\r");	
-		while(UartSendDataTimes--)
+		printf("\r");
+		while (UartSendDataTimes--)
 		{
-			printf("UartSendData %d times\n",UartSendDataTimes);
-			write(fd,UartBuffer, strlen(UartBuffer));	//parameter 2 is send data ,parameter 3 length
-			sleep(1);		
+			printf("UartSendData %d times\n", UartSendDataTimes);
+			write(fd, UartBuffer, strlen(UartBuffer));	//parameter 2 is send data ,parameter 3 length
+			sleep(1);
 		}
-    }
+	}
 	close(fd);
 }
 
-int set_opt(int fd,int nSpeed, int nBits, char nEvent, int nStop)
+int set_opt(int fd, int nSpeed, int nBits, char nEvent, int nStop)
 {
-	struct termios newtio,oldtio;
-	if  ( tcgetattr( fd,&oldtio)  !=  0) { 
+	struct termios newtio, oldtio;
+	if  ( tcgetattr( fd, &oldtio)  !=  0) {
 		perror("SetupSerial 1");
 		return -1;
 	}
@@ -55,7 +55,7 @@ int set_opt(int fd,int nSpeed, int nBits, char nEvent, int nStop)
 	newtio.c_cflag  |=  CLOCAL | CREAD;
 	newtio.c_cflag &= ~CSIZE;
 
-	switch( nBits )
+	switch ( nBits )
 	{
 	case 7:
 		newtio.c_cflag |= CS7;
@@ -65,24 +65,24 @@ int set_opt(int fd,int nSpeed, int nBits, char nEvent, int nStop)
 		break;
 	}
 
-	switch( nEvent )
+	switch ( nEvent )
 	{
 	case 'O':
 		newtio.c_cflag |= PARENB;
 		newtio.c_cflag |= PARODD;
 		newtio.c_iflag |= (INPCK | ISTRIP);
 		break;
-	case 'E': 
+	case 'E':
 		newtio.c_iflag |= (INPCK | ISTRIP);
 		newtio.c_cflag |= PARENB;
 		newtio.c_cflag &= ~PARODD;
 		break;
-	case 'N':  
+	case 'N':
 		newtio.c_cflag &= ~PARENB;
 		break;
 	}
 
-	switch( nSpeed )
+	switch ( nSpeed )
 	{
 	case 2400:
 		cfsetispeed(&newtio, B2400);
@@ -109,14 +109,14 @@ int set_opt(int fd,int nSpeed, int nBits, char nEvent, int nStop)
 		cfsetospeed(&newtio, B9600);
 		break;
 	}
-	if( nStop == 1 )
+	if ( nStop == 1 )
 		newtio.c_cflag &=  ~CSTOPB;
 	else if ( nStop == 2 )
-	newtio.c_cflag |=  CSTOPB;
+		newtio.c_cflag |=  CSTOPB;
 	newtio.c_cc[VTIME]  = 0;
 	newtio.c_cc[VMIN] = 0;
-	tcflush(fd,TCIFLUSH);
-	if((tcsetattr(fd,TCSANOW,&newtio))!=0)
+	tcflush(fd, TCIFLUSH);
+	if ((tcsetattr(fd, TCSANOW, &newtio)) != 0)
 	{
 		perror("com set error");
 		return -1;
