@@ -16,7 +16,7 @@ char *buzzer = "/dev/buzzer_ctl";
 void my_message_callback(struct mosquitto *mosq, void *userdata, const struct mosquitto_message *message)
 {
 	if (message->payloadlen) {
-		printf("%s %s", message->topic, (char *)message->payload);
+		printf("%s \n %s \n", message->topic, (char *)message->payload);
 
 		/**************************
 		 *      json的解析
@@ -45,8 +45,12 @@ void my_message_callback(struct mosquitto *mosq, void *userdata, const struct mo
 
 		//判断指令
 		if (strcmp(json_type->valuestring, "led") == 0) {
+			printf("is led\n");
 
 			if (strcmp(json_cmd->valuestring, "on") == 0) {
+
+				printf("is on\n");
+
 				if ((fd = open(buzzer, O_RDWR | O_NOCTTY | O_NDELAY)) < 0)
 					printf("open %s failed\n", buzzer);
 				else
