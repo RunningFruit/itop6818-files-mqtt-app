@@ -28,6 +28,7 @@ mosquitto_pub -h localhost -t mytopic -m "test message" -u admin -P admin
 <a href="https://github.com/yuanabc/ziot-mqtt.git" target="_blank">ziot-mqtt</a>
 ```
 http://localhost:8080/send/data?sendData=123456
+https://brightereyer.com/mqtt/devices/led?sendData=on
 ```
 
 <a href="https://www.cnblogs.com/founderswitch/p/10791931.html" target="_blank">MQTT在react-native中的运行</a><br>
