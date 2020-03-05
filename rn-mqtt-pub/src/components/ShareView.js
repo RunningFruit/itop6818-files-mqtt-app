@@ -73,11 +73,11 @@ export default class ShareView extends Component {
                 inputRange: [0, 1],
                 outputRange: [-CHANNEL_HEIGHT, 0]
             })
-        }
+        };
         let channelProps = {
             shareChannels: ['QQ', '微信', '朋友圈', '新浪微博'],
             channelImages: []
-        }
+        };
 
         return (
             <ChannelContainer

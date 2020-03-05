@@ -17,25 +17,25 @@ import {observer, inject} from 'mobx-react/native'
 @observer
 export default class Profile extends PureComponent {
 
-    _settingAction = () => alert('setting')
+    _settingAction = () => alert('setting');
 
     _onLogin = () => {
-        const {app, navigator} = this.props
-        app.updateBarStyle('default')
+        const {app, navigator} = this.props;
+        app.updateBarStyle('default');
         navigator.push({
             id: 'Login',
             sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
             passProps: {onResetBarStyle: ()=>app.updateBarStyle('light-content')}
         })
-    }
+    };
 
-    _onPressStaticCell = title => alert(title)
+    _onPressStaticCell = title => alert(title);
 
     render() {
         let cellStyle = {
             borderTopWidth: gScreen.onePix,
             borderBottomWidth: gScreen.onePix,
-        }
+        };
 
         return (
             <View style={{flex: 1, backgroundColor: '#f5f5f5'}}>

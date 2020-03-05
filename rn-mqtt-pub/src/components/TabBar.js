@@ -18,16 +18,16 @@ export default class TabBar extends Component {
 
         tabNames    : React.PropTypes.array,
         tabIconNames: React.PropTypes.array
-    }
+    };
 
     render() {
-        const { activeTab, selectedTabIconNames, tabIconNames, tabNames, goToPage } = this.props
+        const { activeTab, selectedTabIconNames, tabIconNames, tabNames, goToPage } = this.props;
 
         return (
             <View style={[styles.tabs, {borderTopWidth: gScreen.onePix}]}>
                 {this.props.tabs.map((tab, i) => {
-                    let color = activeTab === i ? 'red' : 'gray'
-                    let icon = activeTab === i ? selectedTabIconNames[i] : tabIconNames[i]
+                    let color = activeTab === i ? 'red' : 'gray';
+                    let icon = activeTab === i ? selectedTabIconNames[i] : tabIconNames[i];
                     return (
                         <TouchableOpacity
                             key={i}
@@ -71,4 +71,4 @@ const styles = StyleSheet.create({
         height: 26,
         marginBottom: 2
     }
-})
+});

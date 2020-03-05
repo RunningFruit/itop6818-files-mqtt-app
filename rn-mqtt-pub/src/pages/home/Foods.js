@@ -21,30 +21,30 @@ import Loading from '../../components/Loading'
 import LoadMoreFooter from "../../components/LoadMoreFooter";
 
 class FoodsStore {
-    @observable foods = []
-    @observable page = 1
-    @observable kind=''
-    @observable categoryId = 1
-    @observable orderBy = 1
-    @observable orderAsc = 0
-    @observable sub_value = ''
-    @observable isFetching = false
-    @observable isNoMore = true
+    @observable foods = [];
+    @observable page = 1;
+    @observable kind='';
+    @observable categoryId = 1;
+    @observable orderBy = 1;
+    @observable orderAsc = 0;
+    @observable sub_value = '';
+    @observable isFetching = false;
+    @observable isNoMore = true;
 
     constructor(kind, categoryId) {
-        this.categoryId = categoryId
-        this.kind = kind
-        this.isFetching = true
+        this.categoryId = categoryId;
+        this.kind = kind;
+        this.isFetching = true;
         this.fetchFoods()
     }
 
     @action
     fetchFoods = async() => {
         try {
-            const {foods, isNoMore} = await this._fetchDataFromUrl()
+            const {foods, isNoMore} = await this._fetchDataFromUrl();
             runInAction(() => {
-                this.isFetching = false
-                this.isNoMore = isNoMore
+                this.isFetching = false;
+                this.isNoMore = isNoMore;
 
                 if (this.page === 1) {
                     this.foods.replace(foods)
@@ -55,7 +55,7 @@ class FoodsStore {
         } catch (error) {
             this.isFetching = false
         }
-    }
+    };
 
     _fetchDataFromUrl() {
         return new Promise((resolve, reject) => {
@@ -87,9 +87,9 @@ export default class Foods extends Component {
         sortTypes: [],
         subCategory: '全部',
         sortCode: 'calory'
-    }
+    };
 
-    foodsStore = new FoodsStore(this.props.kind, this.props.category.id)
+    foodsStore = new FoodsStore(this.props.kind, this.props.category.id);
 
     componentDidMount() {
         this.dispose = reaction(
@@ -100,7 +100,7 @@ export default class Foods extends Component {
                 this.foodsStore.sub_value
             ],
             () => this.foodsStore.fetchFoods()
-        )
+        );
         this._fetchSortTypes()
     }
 
