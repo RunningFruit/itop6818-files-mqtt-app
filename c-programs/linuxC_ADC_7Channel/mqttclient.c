@@ -111,7 +111,7 @@ void my_message_callback(struct mosquitto *mosq, void *userdata, const struct mo
 				printf("指令：%s\n", json_cmd->valuestring);
 			}
 			//释放内存
-			cJSON_Delete(json);
+			//cJSON_Delete(json);
 		}
 
 		excuteByCmd(json_type->valuestring, json_cmd->valuestring);
